@@ -10,7 +10,8 @@ gStyle.SetPadLeftMargin(0.20)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-i', '--inputFile', default='Myroot_CMSSW_9_4_0_pre2_PU25ns_94X_mc2017_realistic_v1-v1_ZTT.root', help='Input file name')
+    parser.add_argument(
+        '-i', '--inputFile', default='Myroot_CMSSW_9_4_0_pre2_PU25ns_94X_mc2017_realistic_v1-v1_ZTT.root', help='Input file name')
     parser.add_argument('-l', '--label', default='standard', help='Label for plot output')
     parser.add_argument('-t', '--treeName', default='per_tau', help='Name of TTree in file')
     args = parser.parse_args()
@@ -28,28 +29,31 @@ if __name__ == '__main__':
     cut = 'tau_genpt>20 && abs(tau_geneta)<2.3'
 
     h_migration = TH2F('migration{}'.format(title), '', 5, -1., 4., 6, -2, 4.)
-    tree.Project(h_migration.GetName(), tau_dm_string+':'+tau_dm_string.replace('tau_', 'tau_gen'), cut)
+    # print h_migration.GetName()
+    tree.Project(h_migration.GetName(), tau_dm_string + ':' + tau_dm_string.replace('tau_', 'tau_gen'), cut)
 
     label = ['None', 'Other', '#pi', '#pi#pi^{0}s', '#pi#pi#pi', '#pi#pi#pi#pi^{0}s']
-    for ybin in range(1, h_migration.GetYaxis().GetNbins()+1):
-        h_migration.GetYaxis().SetBinLabel(ybin, label[ybin-1])
-    for xbin in range(1, h_migration.GetXaxis().GetNbins()+1):
+    for ybin in range(1, h_migration.GetYaxis().GetNbins() + 1):
+        h_migration.GetYaxis().SetBinLabel(ybin, label[ybin - 1])
+    for xbin in range(1, h_migration.GetXaxis().GetNbins() + 1):
         h_migration.GetXaxis().SetBinLabel(xbin, label[xbin])
 
     h_migration.GetYaxis().SetTitle('Offline DM')
     h_migration.GetXaxis().SetTitle('Gen DM')
 
-    for xbin in xrange(1, h_migration.GetNbinsX()+1):
-        int_y = sum(h_migration.GetBinContent(xbin, ybin) for ybin in xrange(1, h_migration.GetNbinsY()+1))
+    for xbin in xrange(1, h_migration.GetNbinsX() + 1):
+        int_y = sum(h_migration.GetBinContent(xbin, ybin) for ybin in xrange(1, h_migration.GetNbinsY() + 1))
+        # print int_y
         if int_y == 0.:
             int_y = 1.
-        for ybin in xrange(1, h_migration.GetNbinsY()+1):
+        for ybin in xrange(1, h_migration.GetNbinsY() + 1):
             # cont = round(h_migration.GetBinContent(xbin, ybin)/int_y, 2)
-            h_migration.SetBinContent(xbin, ybin, h_migration.GetBinContent(xbin, ybin)/int_y)
+            # print "bin content ", h_migration.GetBinContent(xbin, ybin)
+            h_migration.SetBinContent(xbin, ybin, h_migration.GetBinContent(xbin, ybin) / int_y)
 
     h_migration.Draw('TEXT')
     h_migration.SetMarkerColor(1)
     h_migration.SetMarkerSize(2.2)
     gStyle.SetPaintTextFormat("1.2f")
 
-    canvas.Print('dm_migration_{}.pdf'.format(title))
+    canvas.Print('dm_migration_{}.png'.format(title))
